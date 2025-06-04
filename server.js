@@ -1,7 +1,7 @@
 const express = require('express');
 const http = require('http');
 const { Server } = require("socket.io");
-//const path = require('path');
+const path = require('path');
 const os = require('os');
 
 const app = express();
@@ -151,7 +151,7 @@ function getLocalIpAddress() {
 const localIpAddress = getLocalIpAddress();
 
 server.listen(PORT, () => {
-    console.log(`Server is running on http://${localIpAddress}:${PORT}`);
+    console.log(`Server is running on https://${localIpAddress}:${PORT}`);
     //console.log(`Access Client multiple via: http://${localIpAddress}:${PORT}/multiple?serverUrl=http://${localIpAddress}:${PORT}`);
     //console.log(`Access Client control via: http://${localIpAddress}:${PORT}/control?serverUrl=http://${localIpAddress}:${PORT}`);
 });
