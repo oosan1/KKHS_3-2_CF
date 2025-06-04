@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Control Client B</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <header>
+        <h1>制御パネル</h1>
+        <div id="connection-status">接続クライアント: <span id="client-count">0</span></div>
+    </header>
+    <div id="connection-panel">
+        <label for="socket-io-url">サーバーURL:</label>
+        <input type="text" id="socket-io-url" value="http://localhost:3000" size="50">
+        <button id="connect-to-server-btn">Connect</button>
+    </div>
+
+    <nav id="mode-selector">
+        <button data-mode="color">画面色変更</button>
+        <button data-mode="number">番号確認</button>
+        <button data-mode="audio">音声再生</button>
+        <button data-mode="photo">画像撮影</button>
+    </nav>
+
+    <main>
+        <div id="color-mode" class="mode-panel">
+            <h2>画面色変更モード</h2>
+            <input type="color" id="color-picker" value="#ff0000">
+            <button id="color-all-btn">全てに適用</button>
+            <div class="client-buttons-grid" id="color-clients"></div>
+        </div>
+
+        <div id="number-mode" class="mode-panel hidden">
+            <h2>番号確認モード</h2>
+            <button id="show-number-btn">全クライアントの番号を表示</button>
+        </div>
+
+        <div id="audio-mode" class="mode-panel hidden">
+            <h2>音声再生モード</h2>
+            <div class="audio-controls">
+                <button id="audio-bgm-btn">BGMを一斉再生</button>
+                <button id="audio-stop-btn">全音声停止</button>
+                <label for="volume-slider">音量:</label>
+                <input type="range" id="volume-slider" min="0" max="1" step="0.05" value="0.5">
+                <button id="volume-set-btn">全クライアントに音量設定</button>
+            </div>
+            <p>個別再生</p>
+            <div class="client-buttons-grid" id="audio-clients"></div>
+        </div>
+
+        <div id="photo-mode" class="mode-panel hidden">
+            <h2>画像撮影モード</h2>
+            <div class="photo-controls">
+                <label for="shot-count">撮影枚数:</label>
+                <input type="number" id="shot-count" value="3" min="1">
+                <button id="start-shooting-btn">撮影開始</button>
+                <button id="stop-shooting-btn">撮影停止</button>
+            </div>
+            <div id="photo-gallery"></div>
+        </div>
+    </main>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.8.1/socket.io.min.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>
