@@ -92,7 +92,7 @@ io.on('connection', (socket) => {
     // 音声再生
     socket.on('control-play-audio', (data) => {
         if (data.target === 'all') {
-            io.emit('command-play-audio', { type: 'bgm' });
+            io.emit('command-play-audio', { type: 'bgm', time: data.time});
         } else {
              const targetSocketId = Object.keys(clientsA).find(id => clientsA[id] == data.target);
             if (targetSocketId) {
