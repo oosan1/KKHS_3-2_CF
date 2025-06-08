@@ -98,7 +98,9 @@ document.getElementById('show-number-btn').addEventListener('click', () => {
 // --- 機能③: 音声再生 ---
 const audioClientsGrid = document.getElementById('audio-clients');
 document.getElementById('audio-bgm-btn').addEventListener('click', () => {
-    socket.emit('control-play-audio', { target: 'all' });
+    const currentTime = new Date().getTime(); // 現在時刻をミリ秒で取得
+    const oneSecondLater = currentTime + 1000; // 1秒後を計算
+    socket.emit('control-play-audio', { target: 'all', time: oneSecondLater});
 });
 document.getElementById('audio-stop-btn').addEventListener('click', () => {
     socket.emit('control-stop-audio');

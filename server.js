@@ -1,11 +1,18 @@
 const express = require('express');
-const http = require('http');
+const https = require('https');
+//const http = require('http');
 const { Server } = require("socket.io");
 const path = require('path');
 const os = require('os');
+const fs = require('fs');
 
 const app = express();
-const server = http.createServer(app);
+const options = {
+        key: fs.readFileSync("server-key.pem"),
+        cert: fs.readFileSync("server-cert.pem")
+};
+const server = https.createServer(options, app);
+//const server = http.createServer(app);
 const io = new Server(server, {
     cors: {
         origin: "*",
@@ -16,7 +23,7 @@ const io = new Server(server, {
 const PORT = 3000;
 
 // クライアントAとクライアントBの静的ファイルを提供
-/*app.use('/multiple', express.static(path.join(__dirname, 'public/client_multiple')));
+app.use('/multiple', express.static(path.join(__dirname, 'public/client_multiple')));
 app.use('/control', express.static(path.join(__dirname, 'public/client_control')));
 
 // ルーティング
@@ -26,7 +33,7 @@ app.get('/multiple', (req, res) => {
 
 app.get('/control', (req, res) => {
     res.sendFile(path.join(__dirname, 'client_control', 'index.html'));
-});*/
+});
 
 // 接続しているクライアントAを管理
 let clientsA = {}; // { socketId: number }
@@ -151,7 +158,12 @@ function getLocalIpAddress() {
 const localIpAddress = getLocalIpAddress();
 
 server.listen(PORT, () => {
+    console.log("========HTTP========");
+    console.log(`Server is running on http://${localIpAddress}:${PORT}`);
+    console.log(`Access Client multiple via: http://${localIpAddress}:${PORT}/multiple?serverUrl=http://${localIpAddress}:${PORT}`);
+    console.log(`Access Client control via: http://${localIpAddress}:${PORT}/control?serverUrl=http://${localIpAddress}:${PORT}`);
+    console.log("========HTTPS========");
     console.log(`Server is running on https://${localIpAddress}:${PORT}`);
-    //console.log(`Access Client multiple via: http://${localIpAddress}:${PORT}/multiple?serverUrl=http://${localIpAddress}:${PORT}`);
-    //console.log(`Access Client control via: http://${localIpAddress}:${PORT}/control?serverUrl=http://${localIpAddress}:${PORT}`);
+    console.log(`Access Client multiple via: https://${localIpAddress}:${PORT}/multiple?serverUrl=https://${localIpAddress}:${PORT}`);
+    console.log(`Access Client control via: https://${localIpAddress}:${PORT}/control?serverUrl=https://${localIpAddress}:${PORT}`);
 });
