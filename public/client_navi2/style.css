@@ -30,6 +30,7 @@ canvas {
     padding: 10px;
     font-size: 1.2em;
     width: 100px; /* 幅を調整 */
+    position: absolute;
 }
 
 #server-url-input {
@@ -37,4 +38,6 @@ canvas {
     font-size: 1.2em;
     width: 80%; /* 幅を調整 */
     max-width: 400px; /* 最大幅を設定 */
+    left: 150px;
+    position: absolute;
 }

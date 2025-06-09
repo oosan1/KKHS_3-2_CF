@@ -1,7 +1,7 @@
-const TEST_MODE = true;
+const TEST_MODE = false;
 
 // ナビゲーターのベースカラー
-const CHARACTER_BASE_COLOR = 0x87CEEB;
+const CHARACTER_BASE_COLOR = 0x800080;
 
 // LocalStorageに保存する際のキー
 const MASK_STORAGE_KEY = "houseMaskShape";
@@ -21,16 +21,78 @@ function resizeApp() {
 window.addEventListener('resize', resizeApp);
 resizeApp();
 
+// 描画範囲
+const MASK_POINTS = {
+    centerX: app.screen.width / 2,
+    centerY: app.screen.height / 2,
+    width: 500,
+    height: 400,
+    roofHeight: 40
+}
+
 let mainContainer = new PIXI.Container();
 app.stage.addChild(mainContainer);
 
+// ======== Socket.ioの管理 ========
+const connectButton = document.getElementById('connect-button');
+const serverUrl = document.getElementById('server-url-input');
+connectButton.addEventListener("click", async () => {
+    // iOS対策：ユーザー操作時に AudioContext を resume
+    if (audioContext.state === 'suspended') {
+        try {
+            await audioContext.resume();
+            console.log("AudioContext resumed successfully.");
+        } catch (e) {
+            console.error("AudioContext resume failed:", e);
+        }
+    }
+    await loadAudioFiles()
+    connectButton.style.display = "none";
+    serverUrl.style.display = "none";
+    progress();
+})
+
+let audioBuffers = {}; // 音声ファイルのバッファを格納
+
+// すべての音声ファイルを読み込む
+async function loadAudioFiles() {
+    const audioFileNames = [];
+    for (let i = 1; i <= 3; i++) {
+        audioFileNames.push(`${String(i).padStart(3, '0')}.wav`);
+    }
+
+    for (const fileName of audioFileNames) {
+        const response = await fetch(`audio/navi/${fileName}`);
+        const arrayBuffer = await response.arrayBuffer();
+        const audioBuffer = await audioContext.decodeAudioData(arrayBuffer);
+        audioBuffers[fileName] = audioBuffer;
+    }
+}
+
+function playAudioBuffer(fileName, when = 0, volume = 1.0) {
+    const buffer = audioBuffers[fileName];
+    if (!buffer) {
+        console.warn(`音声バッファが見つかりません: ${fileName}`);
+        return;
+    }
+
+    const source = audioContext.createBufferSource();
+    source.buffer = buffer;
+
+    source.connect(globalGainNode);
+    console.log(audioContext.currentTime + when);
+    source.start(audioContext.currentTime + when);
+
+    // 停止時に参照するため保持（複数同時再生も考慮するなら配列で管理）
+    lastPlayingSource = source;
+}
 
 // ======== 字幕の管理 ========
 const subtitleElement = document.getElementById('subtitle-container');
-subtitleElement.style.bottom        = "15%";    // 画面下からの位置
+subtitleElement.style.bottom        = "300px";    // 画面下からの位置
 subtitleElement.style.left          = "50%";    // 画面左からの位置
-subtitleElement.style["max-width"]  = "800px";  // 最大横幅
-subtitleElement.style["font-size"]  = "28px";   // フォントサイズ
+subtitleElement.style["max-width"]  = "450px";  // 最大横幅
+subtitleElement.style["font-size"]  = "20px";   // フォントサイズ
 if (TEST_MODE) {
     subtitleElement.innerHTML = "これはテストテキストです。これはテストテキストです。これはテストテキストです。";
 }
@@ -64,12 +126,9 @@ async function playSubtitleAndAudio(text, audioPath) {
  * @param {string} path - 音声ファイルのパス
  * @returns {Promise<void>}
  */
-async function playAudio(path) {
+async function playAudio(fileName) {
     try {
-        const response = await fetch(path);
-        const arrayBuffer = await response.arrayBuffer();
-        const audioBuffer = await audioContext.decodeAudioData(arrayBuffer);
-
+        const audioBuffer = audioBuffers[fileName];
         return new Promise(resolve => {
             const source = audioContext.createBufferSource();
             source.buffer = audioBuffer;
@@ -105,7 +164,7 @@ async function typeSubtitle(text) {
                 setTimeout(() => {
                     subtitleElement.innerHTML = '';
                     resolve();
-                }, 150000); // 1.5秒待機
+                }, 1500); // 1.5秒待機
             }
         }, DELAY_PER_CHAR);
     });
@@ -124,14 +183,14 @@ function createCharacter(color) {
         const endAngle = startAngle + (Math.PI / 3);
         const c = new PIXI.Container();
         const g = new PIXI.Graphics();
-        g.lineStyle(4, color + Math.random(), 0.8);
+        g.lineStyle(4, color, 0.8);
         g.beginFill();
         g.arc(0, 0, radius, startAngle, endAngle);
         g.endFill();
         c.addChild(g);
-        c.speed = (Math.random() - 0.5) * 0.1;
+        c.speed = (Math.random() - 0.5) * 0.2;
         arcs.addChild(c);
-        radius += 20;
+        radius += 10;
     }
     character.addChild(arcs);
 
@@ -152,22 +211,61 @@ function createCharacter(color) {
 }
 
 let character = createCharacter(CHARACTER_BASE_COLOR);
-app.stage.addChild(character);
+mainContainer.addChild(character);
+
+
+// ======== 描画範囲 (マスク) の実装 ========
+/**
+ * 与えられた頂点群から家型のポリゴンを描画する
+ * @param {Array<{x: number, y: number}>} points - タップされた点の配列
+ */
+function createHouseShape() {
+    const roofY = MASK_POINTS["centerY"] - MASK_POINTS["height"] / 2 - MASK_POINTS["roofHeight"];
+    const maxX = MASK_POINTS["centerX"] + MASK_POINTS["width"] / 2;
+    const minX = MASK_POINTS["centerX"] - MASK_POINTS["width"] / 2;
+    const maxY = MASK_POINTS["centerY"] + MASK_POINTS["height"] / 2;
+    const minY = MASK_POINTS["centerY"] - MASK_POINTS["height"] / 2;
+
+    const housePoints = [
+        new PIXI.Point(minX, maxY),     // 左下
+        new PIXI.Point(maxX, maxY),     // 右下
+        new PIXI.Point(maxX, minY),     // 右上
+        new PIXI.Point(MASK_POINTS["centerX"], roofY), // 屋根の頂点
+        new PIXI.Point(minX, minY),     // 左上
+    ];
+
+    houseMask.clear();
+    if (TEST_MODE) {
+        houseMask.lineStyle(5, 0xFFFFFF, 1, 1);
+    }else {
+        houseMask.beginFill(0xFFFFFF);
+    }
+    houseMask.drawPolygon(housePoints);
+    houseMask.endFill();
+
+    return housePoints;
+}
+
+let houseMask = new PIXI.Graphics();
+app.stage.addChild(houseMask);
+if (!TEST_MODE) {
+    mainContainer.mask = houseMask;
+}
+createHouseShape();
 
 // ======== アニメーションループ ========
-
-app.ticker.add((delta) => {
+function floating(delta) {
     character.animationProps.time += delta * 0.05;
 
     // 上下運動 (Sine波)
-    //character.y = character.animationProps.initialY + Math.sin(character.animationProps.time) * 10;
-    character.y -= 1;
+    character.y = character.animationProps.initialY + Math.sin(character.animationProps.time) * 10;
     // 円弧の回転
-    //character.animationProps.arcs.rotation += 0.01 * delta;
+    character.animationProps.arcs.rotation += 0.01 * delta;
     for (const arc of character.children[0].children) {
         arc.rotation += arc.speed;
     }
-});
+}
+app.ticker.add(floating);
 
 // ======== 初期化処理 ========
 
@@ -176,14 +274,32 @@ function init() {
     character.x = app.screen.width / 2;
     character.y = app.screen.height / 2;
     character.animationProps.initialY = app.screen.height / 2 - 50;
+    character.alpha = 0;
+}
 
-    setTimeout(() => {
-        playSubtitleAndAudio(
-            "こんにちは。これはHTMLとJavaScriptで作られたデモです。",
-            "sample.wav" // あなたが用意した音声ファイル名
-        );
-        
-    }, 2000);
+async function progress() {
+    await new Promise(resolve => {
+        gsap.to(character, {
+            alpha: 1,      // 最終的な透明度
+            duration: 4,   // アニメーション時間（秒）
+            ease: "power2.out", // アニメーションのイージング（オプション）
+            onComplete: () => {
+                resolve();
+            }
+        });
+    });
+    await playSubtitleAndAudio(
+            "こんにちは。あなたがたがここへ来ていることは気づいていました。",
+            "001.wav"
+    );
+    await playSubtitleAndAudio(
+            "来れるはずが無い、来てはいけない「ここ」になぜいるのでしょうか。",
+            "002.wav"
+    );
+    await playSubtitleAndAudio(
+            "まぁ、悪意は無いようですので今回は”迷い込んだ”ということにしておきましょう。",
+            "003.wav"
+    );
 }
 
 init();
