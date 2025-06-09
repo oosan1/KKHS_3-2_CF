@@ -13,16 +13,28 @@ canvas {
 
 #subtitle-container {
     position: absolute;
-    bottom: 15%; /* 画面下からの位置 */
-    left: 50%;
+    bottom: 500px; /* 画面下からの位置 */
+    left: 500px;
     transform: translateX(-50%);
     width: 80%;
     max-width: 800px;
-    padding: 10px 20px;
     color: white;
     font-size: 28px;
     font-family: 'Helvetica Neue', Arial, sans-serif;
     text-align: center;
     line-height: 1.5;
     pointer-events: none; /* 字幕部分がタップイベントを妨げないようにする */
+}
+
+#connect-button {
+    padding: 10px;
+    font-size: 1.2em;
+    width: 100px; /* 幅を調整 */
+}
+
+#server-url-input {
+    padding: 10px;
+    font-size: 1.2em;
+    width: 80%; /* 幅を調整 */
+    max-width: 400px; /* 最大幅を設定 */
 }

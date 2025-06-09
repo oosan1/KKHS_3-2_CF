@@ -292,27 +292,11 @@ app.ticker.add((delta) => {
 // ======== 初期化処理 ========
 
 function init() {
-    const savedMask = loadMaskFromStorage();
-    if (!savedMask) {
-        console.log(savedMask);
-        // 保存されたマスクがなければ全画面表示
-        createHouseShape(null);
-        character.x = app.screen.width / 2;
-        character.y = app.screen.height / 2;
-        character.animationProps.initialY = app.screen.height / 2 - 50;
-    }
+    // 保存されたマスクがなければ全画面表示
+    character.x = app.screen.width / 2;
+    character.y = app.screen.height / 2;
+    character.animationProps.initialY = app.screen.height / 2 - 50;
 
-    console.log("House mask applied. Character position adjusted to:", { x: character.x, y: character.y });
-    // マスクとキャラクターのバウンディングボックスを比較してみる
-    const characterBounds = character.getBounds();
-    const maskBounds = houseMask.getBounds();
-    console.log("Character Bounds:", characterBounds);
-    console.log("Mask Bounds:", maskBounds);
-
-    if (!maskBounds.contains(characterBounds.x, characterBounds.y) ||
-        !maskBounds.contains(characterBounds.x + characterBounds.width, characterBounds.y + characterBounds.height)) {
-        console.warn("WARNING: Character might be outside the mask bounds!");
-    }
     // 5秒後にデモを開始
     setTimeout(() => {
         playSubtitleAndAudio(
