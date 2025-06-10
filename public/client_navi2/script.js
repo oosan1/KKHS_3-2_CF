@@ -9,6 +9,9 @@ const MASK_STORAGE_KEY = "houseMaskShape";
 // 字幕の表示間隔(ms)
 const DELAY_PER_CHAR = 200;
 
+//音声ファイル数
+const AUDIO_FILE_COUNT = 16;
+
 // ======== PIXIアプリケーションの初期化 ========
 let app = new PIXI.Application();
 document.body.appendChild(app.view);
@@ -90,7 +93,7 @@ let audioBuffers = {}; // 音声ファイルのバッファを格納
 // すべての音声ファイルを読み込む
 async function loadAudioFiles() {
     const audioFileNames = [];
-    for (let i = 1; i <= 3; i++) {
+    for (let i = 1; i <= AUDIO_FILE_COUNT; i++) {
         audioFileNames.push(`${String(i).padStart(3, '0')}.wav`);
     }
 
@@ -334,6 +337,38 @@ async function show1() {
     await playSubtitleAndAudio(
             "まぁ、悪意は無いようですので今回は”迷い込んだ”ということにしておきましょう。",
             "003.wav"
+    );
+    await playSubtitleAndAudio(
+            "ここは世界中で忘れられた記憶や思い出などの「なくしもの」が集まる裏世界で、私はここの管理をしています。",
+            "004.wav"
+    );
+    await playSubtitleAndAudio(
+            "さて、そこで提案ですが、私の手伝いをしていきませんか？",
+            "005.wav"
+    );
+    await playSubtitleAndAudio(
+            "そんなに難しい仕事ではありません。ただの間違い探しです。",
+            "006.wav"
+    );
+    await playSubtitleAndAudio(
+            "まず初めに私が作った「なくしもの」の無い世界を見ていただきます。",
+            "007.wav"
+    );
+    await playSubtitleAndAudio(
+            "その後、「なくしもの」のある裏世界へ行き、変化した部分を記録してください。",
+            "008.wav"
+    );
+    await playSubtitleAndAudio(
+            "記録された「なくしもの」はこちらで浄化して元の世界へ戻します。",
+            "009.wav"
+    );
+    await playSubtitleAndAudio(
+            "では私も暇ではありません。さっそく始めましょうか。",
+            "010.wav"
+    );
+    await playSubtitleAndAudio(
+            "あちらの扉から裏世界へ進んでください。",
+            "011.wav"
     );
 }
 
