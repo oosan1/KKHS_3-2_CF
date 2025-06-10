@@ -1,0 +1,138 @@
+body {
+    font-family: sans-serif;
+    margin: 0;
+    background-color: #f0f0f0;
+}
+header {
+    background-color: #333;
+    color: white;
+    padding: 10px 20px;
+    text-align: center;
+}
+/* Socket.IO接続パネルのスタイル */
+#connection-panel {
+    background-color: #f8f9fa;
+    padding: 15px;
+    border-bottom: 1px solid #e2e6ea;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 20px;
+    border-radius: 5px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+#connection-panel label {
+    font-weight: bold;
+    color: #343a40;
+}
+
+#connection-panel input[type="text"] {
+    flex-grow: 1;
+    padding: 8px 12px;
+    border: 1px solid #ced4da;
+    border-radius: 4px;
+    font-size: 1em;
+}
+
+#connection-panel button {
+    padding: 8px 15px;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 1em;
+    transition: background-color 0.2s ease;
+}
+
+#connection-panel button:hover {
+    background-color: #0056b3;
+}
+nav {
+    display: flex;
+    justify-content: center;
+    background-color: #555;
+}
+nav button {
+    padding: 15px 25px;
+    border: none;
+    background-color: #555;
+    color: white;
+    cursor: pointer;
+    font-size: 1em;
+}
+nav button.active {
+    background-color: #007bff;
+}
+main {
+    padding: 20px;
+}
+.mode-panel {
+    background-color: white;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+.hidden {
+    display: none;
+}
+.client-buttons-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+    gap: 10px;
+    margin-top: 20px;
+}
+.client-btn {
+    padding: 15px 10px;
+    font-size: 1.2em;
+    border: 1px solid #ccc;
+    background-color: #e9ecef;
+    cursor: pointer;
+    border-radius: 5px;
+    transition: background-color 0.2s;
+}
+.client-btn.connected {
+    background-color: #28a745;
+    color: white;
+    border-color: #28a745;
+}
+.client-btn:hover {
+    background-color: #ced4da;
+}
+
+/* 各モードのコントロール */
+.audio-controls, .photo-controls {
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    flex-wrap: wrap;
+}
+input[type="color"], input[type="number"], input[type="range"] {
+    margin-right: 10px;
+}
+
+/* 写真ギャラリー */
+#photo-gallery {
+    margin-top: 20px;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 15px;
+}
+.photo-container {
+    border: 1px solid #ccc;
+    padding: 10px;
+    border-radius: 5px;
+    background-color: #fff;
+}
+.photo-container h3 {
+    margin: 0 0 10px 0;
+}
+.photo-container img {
+    max-width: 100%;
+    height: auto;
+    display: block;
+    margin-top: 5px;
+    border: 1px solid #ddd;
+}

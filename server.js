@@ -23,26 +23,31 @@ const io = new Server(server, {
 const PORT = 3000;
 
 // クライアントAとクライアントBの静的ファイルを提供
-app.use('/multiple', express.static(path.join(__dirname, 'public/client_multiple')));
-app.use('/control', express.static(path.join(__dirname, 'public/client_control')));
+app.use('/camera', express.static(path.join(__dirname, 'public/client_camera')));
+app.use('/control', express.static(path.join(__dirname, 'public/client_mainControl')));
+app.use('/navi', express.static(path.join(__dirname, 'public/client_navi2')));
 
 // ルーティング
-app.get('/multiple', (req, res) => {
-    res.sendFile(path.join(__dirname, 'client_multiple', 'index.html'));
+app.get('/camera', (req, res) => {
+    res.sendFile(path.join(__dirname, 'client_camera', 'index.html'));
 });
 
 app.get('/control', (req, res) => {
-    res.sendFile(path.join(__dirname, 'client_control', 'index.html'));
+    res.sendFile(path.join(__dirname, 'client_mainControl', 'index.html'));
+});
+app.get('/navi', (req, res) => {
+    res.sendFile(path.join(__dirname, 'client_navi2', 'index.html'));
 });
 
 // 接続しているクライアントAを管理
 let clientsA = {}; // { socketId: number }
 let controlSocket = null;
+let naviSocket = null;
 
 io.on('connection', (socket) => {
     console.log(`A user connected: ${socket.id}`);
 
-    // クライアントAの登録
+    // カメラクライアントの登録
     socket.on('register-client-a', (number) => {
         clientsA[socket.id] = number;
         console.log(`Client A registered: Socket ${socket.id} is Number ${number}`);
@@ -52,11 +57,22 @@ io.on('connection', (socket) => {
         }
     });
 
-    // クライアントBの登録
+    // コントロールクライアントの登録
     socket.on('register-control-client', () => {
         controlSocket = socket;
-        console.log(`Control Client B registered: ${socket.id}`);
-        socket.emit('update-client-list', Object.values(clientsA));
+        console.log(`Control Client registered: ${socket.id}`);
+    });
+
+    // ナビクライアントの登録
+    socket.on('register-client-navi', () => {
+        naviSocket = socket;
+        console.log(`Client Navi registered: ${socket.id}`);
+    });
+
+    // 進行管理
+    // ナビの案内をスタート
+    socket.on('control-start-navi', (data) => {
+        io.emit('command-start-navi', data);
     });
 
     // 切断処理
@@ -160,10 +176,12 @@ const localIpAddress = getLocalIpAddress();
 server.listen(PORT, () => {
     console.log("========HTTP========");
     console.log(`Server is running on http://${localIpAddress}:${PORT}`);
-    console.log(`Access Client multiple via: http://${localIpAddress}:${PORT}/multiple?serverUrl=http://${localIpAddress}:${PORT}`);
+    console.log(`Access Client camera via: http://${localIpAddress}:${PORT}/camera?serverUrl=http://${localIpAddress}:${PORT}`);
+    console.log(`Access Client navi via: http://${localIpAddress}:${PORT}/navi?serverUrl=http://${localIpAddress}:${PORT}`);
     console.log(`Access Client control via: http://${localIpAddress}:${PORT}/control?serverUrl=http://${localIpAddress}:${PORT}`);
     console.log("========HTTPS========");
     console.log(`Server is running on https://${localIpAddress}:${PORT}`);
-    console.log(`Access Client multiple via: https://${localIpAddress}:${PORT}/multiple?serverUrl=https://${localIpAddress}:${PORT}`);
+    console.log(`Access Client camera via: https://${localIpAddress}:${PORT}/camera?serverUrl=https://${localIpAddress}:${PORT}`);
+    console.log(`Access Client navi via: https://${localIpAddress}:${PORT}/navi?serverUrl=https://${localIpAddress}:${PORT}`);
     console.log(`Access Client control via: https://${localIpAddress}:${PORT}/control?serverUrl=https://${localIpAddress}:${PORT}`);
 });

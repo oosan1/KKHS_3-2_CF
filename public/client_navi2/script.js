@@ -23,10 +23,10 @@ resizeApp();
 
 // 描画範囲
 const MASK_POINTS = {
-    centerX: app.screen.width / 2,
-    centerY: app.screen.height / 2,
-    width: 500,
-    height: 400,
+    centerX: 690,
+    centerY: 355,
+    width: 420,
+    height: 300,
     roofHeight: 40
 }
 
@@ -36,6 +36,17 @@ app.stage.addChild(mainContainer);
 // ======== Socket.ioの管理 ========
 const connectButton = document.getElementById('connect-button');
 const serverUrl = document.getElementById('server-url-input');
+
+let socket;
+DEFAULT_SOCKET_IO_URL = 'http://localhost:3000';
+const urlParams = new URLSearchParams(window.location.search);
+const queryUrl = urlParams.get('serverUrl');
+if (queryUrl) {
+    serverUrl.value = queryUrl;
+} else {
+    serverUrl.value = DEFAULT_SOCKET_IO_URL;
+}
+
 connectButton.addEventListener("click", async () => {
     // iOS対策：ユーザー操作時に AudioContext を resume
     if (audioContext.state === 'suspended') {
@@ -49,8 +60,30 @@ connectButton.addEventListener("click", async () => {
     await loadAudioFiles()
     connectButton.style.display = "none";
     serverUrl.style.display = "none";
-    progress();
+    await loadAudioFiles(); // ここで読み込む
+    if (socket) {
+        socket.disconnect(); // 既存の接続を切断
+    }
+    socket = io.connect(serverUrl.value);
+    initializeSocketEvents(); // ソケットイベントリスナーを再初期化
 })
+
+
+// --- Socketイベントリスナー ---
+function initializeSocketEvents() {
+    // 接続処理
+    socket.on('connect', () => {
+        socket.emit('register-client-navi');
+    });
+
+    socket.on('command-start-navi', (data) => {
+        if (data.mode == "start") {
+            show1();
+        }else if (data.mode == "iPad") {
+            show2();
+        }
+    });
+};
 
 let audioBuffers = {}; // 音声ファイルのバッファを格納
 
@@ -90,8 +123,8 @@ function playAudioBuffer(fileName, when = 0, volume = 1.0) {
 // ======== 字幕の管理 ========
 const subtitleElement = document.getElementById('subtitle-container');
 subtitleElement.style.bottom        = "300px";    // 画面下からの位置
-subtitleElement.style.left          = "50%";    // 画面左からの位置
-subtitleElement.style["max-width"]  = "450px";  // 最大横幅
+subtitleElement.style.left          = "690px";    // 画面左からの位置
+subtitleElement.style["max-width"]  = "400px";  // 最大横幅
 subtitleElement.style["font-size"]  = "20px";   // フォントサイズ
 if (TEST_MODE) {
     subtitleElement.innerHTML = "これはテストテキストです。これはテストテキストです。これはテストテキストです。";
@@ -236,7 +269,7 @@ function createHouseShape() {
 
     houseMask.clear();
     if (TEST_MODE) {
-        houseMask.lineStyle(5, 0xFFFFFF, 1, 1);
+        houseMask.lineStyle(3, 0xFFFFFF, 1, 1);
     }else {
         houseMask.beginFill(0xFFFFFF);
     }
@@ -259,6 +292,7 @@ function floating(delta) {
 
     // 上下運動 (Sine波)
     character.y = character.animationProps.initialY + Math.sin(character.animationProps.time) * 10;
+    character.y += 0.1;
     // 円弧の回転
     character.animationProps.arcs.rotation += 0.01 * delta;
     for (const arc of character.children[0].children) {
@@ -271,13 +305,14 @@ app.ticker.add(floating);
 
 function init() {
     // 保存されたマスクがなければ全画面表示
-    character.x = app.screen.width / 2;
-    character.y = app.screen.height / 2;
-    character.animationProps.initialY = app.screen.height / 2 - 50;
+    character.x = MASK_POINTS.centerX;
+    character.y = MASK_POINTS.centerY - 50;
+    character.animationProps.initialY = MASK_POINTS.centerY - 50;
     character.alpha = 0;
 }
 
-async function progress() {
+async function show1() {
+    socket.emit('information-navi-status', {status: "出現中"});
     await new Promise(resolve => {
         gsap.to(character, {
             alpha: 1,      // 最終的な透明度
@@ -298,6 +333,13 @@ async function progress() {
     );
     await playSubtitleAndAudio(
             "まぁ、悪意は無いようですので今回は”迷い込んだ”ということにしておきましょう。",
+            "003.wav"
+    );
+}
+
+async function show2() {
+    await playSubtitleAndAudio(
+            "では、台の端末を手に取ってください。",
             "003.wav"
     );
 }
