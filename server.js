@@ -72,11 +72,13 @@ io.on('connection', (socket) => {
     // 進行管理
     // ナビの案内
     socket.on('control-start-navi', (data) => {
+        console.log(data);
         io.emit('command-start-navi', data);
     });
 
     // 正誤判定を開始
     socket.on('control-TrueOrFalse', () => {
+        console.log("TF");
         io.emit('command-TrueOrFalse');
     })
 

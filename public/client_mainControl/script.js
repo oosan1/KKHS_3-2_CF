@@ -8,6 +8,7 @@ const clientCountSpan = document.getElementById('client-count');
 const photoGallery = document.getElementById('photo-gallery');
 const socketIoUrlInput = document.getElementById('socket-io-url');
 const connectToServerBtn = document.getElementById('connect-to-server-btn');
+const navi_status = document.getElementById('navi-status');
 
 // URLクエリパラメータからURLを読み込む
 const urlParams = new URLSearchParams(window.location.search);
@@ -31,6 +32,7 @@ connectToServerBtn.addEventListener('click', () => {
 let connectedClients = [];
 let ipad_photos = {};
 let photo_count = 0;
+let remaining_count = 10;
 
 // モード切り替え
 modeSelector.addEventListener('click', (e) => {
@@ -71,9 +73,12 @@ const navi_4thBtn = document.getElementById('navi-4-button');
 const navi_5thBtn = document.getElementById('navi-5-button');
 const navi_6thBtn = document.getElementById('navi-6-button');
 const navi_7thBtn = document.getElementById('navi-7-button');
-const navi_8thBtn = document.getElementById('navi-8-button');
-const navi_9thBtn = document.getElementById('navi-9-button');
-const navi_10thBtn = document.getElementById('navi-10-button');
+const navi_8thBtns = document.querySelectorAll('.navi-8-button');
+const navi_9thBtns = document.querySelectorAll('.navi-9-button');
+const navi_10thBtns = document.querySelectorAll('.navi-10-button');
+const navi_11thBtns = document.querySelectorAll('.navi-11-button');
+const navi_12thBtns = document.querySelectorAll('.navi-12-button');
+const navi_EndBtn = document.getElementById('navi-end-button');
 //const navi1thBtn = document.getElementById('navi-1th-button');
 const shotCountInput = document.getElementById('shot-count');
 
@@ -110,103 +115,49 @@ navi_6thBtn.addEventListener('click', () => {
     });
 });
 navi_7thBtn.addEventListener('click', () => {
+    remaining_count++;
     socket.emit('control-start-navi', {mode: '7th'});
 })
-navi_8thBtn.addEventListener('click', () => {
-    const shutter_count = parseInt(shotCountInput.value, 10);
-    socket.emit('control-start-navi', {mode: 'search', count: shutter_count});
-    // ギャラリーを初期化
-    ipad_photos = {};
-    photoGallery.innerHTML = '';
-    connectedClients.forEach(num => {
-        const container = document.createElement('div');
-        container.id = `photo-container-${num}`;
-        container.classList.add('photo-container');
-        container.innerHTML = `<h3>iPad ${num}</h3>`;
-        photoGallery.appendChild(container);
-    });
-})
-navi_9thBtn.addEventListener('click', () => {
-    socket.emit('control-start-navi', {mode: 'ring'});
-})
-navi_10thBtn.addEventListener('click', () => {
-    socket.emit('control-start-navi', {mode: '8th'});
-})
-navi_11thBtn.addEventListener('click', () => {
-    socket.emit('control-start-navi', {mode: '9th', count: photo_count});
-    photo_count = 0;
-})
-navi_12thBtn.addEventListener('click', () => {
-    socket.emit('control-start-navi', {mode: '10th'});
-})
-/*navi1thBtn.addEventListener('click', () => {
-    const count = parseInt(shotCountInput.value, 10);
-    socket.emit('control-start-navi', {mode: '1th', count: count});
-})*/
-
-
-// --- 機能①: 画面色変更 ---
-const colorPicker = document.getElementById('color-picker');
-const colorAllBtn = document.getElementById('color-all-btn');
-const colorClientsGrid = document.getElementById('color-clients');
-
-colorAllBtn.addEventListener('click', () => {
-    socket.emit('control-change-color', { target: 'all', color: colorPicker.value });
-});
-colorClientsGrid.addEventListener('click', (e) => {
-    if (e.target.classList.contains('client-btn')) {
-        const number = e.target.dataset.number;
-        socket.emit('control-change-color', { target: number, color: colorPicker.value });
-    }
-});
-
-// --- 機能②: 番号確認 ---
-document.getElementById('show-number-btn').addEventListener('click', () => {
-    socket.emit('control-show-number');
-});
-
-// --- 機能③: 音声再生 ---
-const audioClientsGrid = document.getElementById('audio-clients');
-document.getElementById('audio-bgm-btn').addEventListener('click', () => {
-    const currentTime = new Date().getTime(); // 現在時刻をミリ秒で取得
-    const oneSecondLater = currentTime + 1000; // 1秒後を計算
-    socket.emit('control-play-audio', { target: 'all', time: oneSecondLater});
-});
-document.getElementById('audio-stop-btn').addEventListener('click', () => {
-    socket.emit('control-stop-audio');
-});
-document.getElementById('volume-set-btn').addEventListener('click', () => {
-    const volume = document.getElementById('volume-slider').value;
-    socket.emit('control-set-volume', { volume: parseFloat(volume) });
-});
-audioClientsGrid.addEventListener('click', (e) => {
-    if (e.target.classList.contains('client-btn')) {
-        const number = e.target.dataset.number;
-        socket.emit('control-play-audio', { target: number });
-    }
-});
-
-// --- 機能④: 画像撮影 ---
-//const shotCountInput = document.getElementById('shot-count');
-document.getElementById('start-shooting-btn').addEventListener('click', () => {
-    const count = parseInt(shotCountInput.value, 10);
-    if (count > 0) {
-        socket.emit('control-start-shooting', { count });
+navi_8thBtns.forEach(button => {
+    button.addEventListener('click', () => {
+        const shutter_count = parseInt(shotCountInput.value, 10);
+        socket.emit('control-start-navi', {mode: 'search', count: shutter_count});
         // ギャラリーを初期化
+        ipad_photos = {};
         photoGallery.innerHTML = '';
         connectedClients.forEach(num => {
             const container = document.createElement('div');
             container.id = `photo-container-${num}`;
             container.classList.add('photo-container');
-            container.innerHTML = `<h3>Client ${num}</h3>`;
+            container.innerHTML = `<h3>iPad ${num}</h3>`;
             photoGallery.appendChild(container);
         });
-    }
-});
-document.getElementById('stop-shooting-btn').addEventListener('click', () => {
-    socket.emit('control-stop-shooting');
-});
-
+    })
+})
+navi_9thBtns.forEach(button => {
+    button.addEventListener('click', () => {
+        socket.emit('control-start-navi', {mode: 'ring'});
+    })
+})
+navi_10thBtns.forEach(button => {
+    button.addEventListener('click', () => {
+        socket.emit('control-start-navi', {mode: '8th'});
+    })
+})
+navi_11thBtns.forEach(button => {
+    button.addEventListener('click', () => {
+        socket.emit('control-start-navi', {mode: '9th', count: photo_count});
+        photo_count = 0;
+    })
+})
+navi_12thBtns.forEach(button => {
+    button.addEventListener('click', () => {
+        socket.emit('control-start-navi', {mode: '10th'});
+    })
+})
+navi_EndBtn.addEventListener('click', () => {
+    socket.emit('control-start-navi', {mode: 'end'});
+})
 
 // --- Socketイベントリスナー ---
 function initializeSocketEvents() {
@@ -262,6 +213,9 @@ function initializeSocketEvents() {
                 if (pictureTF[number][count]) {
                     photos.push(ipad_photos[number][count]);
                     photo_count++;
+                    console.log(photo_count);
+                    remaining_count--;
+                    navi_status.innerText = `残りのなくしもの: ${remaining_count}`;
                 }
             }
         }
@@ -271,5 +225,4 @@ function initializeSocketEvents() {
 }
 
 // --- 初期化処理 ---
-createClientButtons();
 document.querySelector('#mode-selector button').click(); // 最初のモードをアクティブにする

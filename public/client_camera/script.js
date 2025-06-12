@@ -141,11 +141,7 @@ function showImagesScreen(photos) {
     hideAllScreens();
     galleryContainer.classList.remove('hidden');
     document.body.appendChild(galleryContainer);
-    try {
-        galleryContainer.removeChild();
-    }catch(e) {
-        console.log(e);
-    }
+    galleryContainer.innerHTML = '';
     photos.forEach((src) => {
         const img = document.createElement('img');
         img.src = src;
@@ -248,6 +244,7 @@ function initializeSocketEvents() {
     });
 
     socket.on('command-showImages', (data) => {
+        console.log(data);
         showImagesScreen(data.photos);
     })
 };

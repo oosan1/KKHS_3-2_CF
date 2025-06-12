@@ -10,7 +10,7 @@ const MASK_STORAGE_KEY = "houseMaskShape";
 const DELAY_PER_CHAR = 200;
 
 //音声ファイル数
-const AUDIO_FILE_COUNT = 47;
+const AUDIO_FILE_COUNT = 65;
 
 // 「なくしもの」カウント
 let nakushimono = 10;
@@ -98,9 +98,11 @@ function initializeSocketEvents() {
         }else if (data.mode == "8th") {
             show8();
         }else if (data.mode == "9th") {
-            show9();
+            show9(data.count);
         }else if (data.mode == "10th") {
             show10();
+        }else if (data.mode == "end") {
+            showEnd();
         }
     });
 };
@@ -576,6 +578,7 @@ async function show8() {
 }
 
 async function show9(count) {
+    console.log(count);
     if (count < 10) {
         await playSubtitleAndAudio(
             "見つけた「なくしもの」は",
@@ -712,15 +715,15 @@ async function show9(count) {
 async function show10() {
     await playSubtitleAndAudio(
         "まだ時間はあります。",
-        "033.wav"
+        "048.wav"
     );
     await playSubtitleAndAudio(
         "引き続き頑張ってください。",
-        "025.wav"
+        "049.wav"
     );
     await playSubtitleAndAudio(
         "一度見つけた「なくしもの」を再度撮影する必要はありません。",
-        "025.wav"
+        "050.wav"
     );
     await playSubtitleAndAudio(
         "では、左後ろの通路から裏世界へ進んでください。",
@@ -728,5 +731,73 @@ async function show10() {
     );
 }
 
+// すべて見つけられなかった場合
+async function showEnd() {
+    if (nakushimono == 0) {
+        await playSubtitleAndAudio(
+            "全ての「なくしもの」を見つけていただき、ありがとうございました。",
+            "053.wav"
+        );
+    }else {
+        await playSubtitleAndAudio(
+            "それではみなさん、お時間です。",
+            "051.wav"
+        );
+        await playSubtitleAndAudio(
+            "全てではありませんが、「なくしもの」を見つけていただき、ありがとうございました。",
+            "052.wav"
+        );
+    }
+    await playSubtitleAndAudio(
+        "端末は置いてあった場所に返してください。",
+        "054.wav"
+    );
+    setTimeout(async () => {
+        await playSubtitleAndAudio(
+            "見つけていただいた「なくしもの」は私の方で浄化し、",
+            "055.wav"
+        );
+        await playSubtitleAndAudio(
+            "もとの世界の持ち主へ返しておきます。",
+            "056.wav"
+        );
+        await playSubtitleAndAudio(
+            "それでは約束通り、みなさんをもとの世界へ戻しましょう。",
+            "057.wav"
+        );
+        await playSubtitleAndAudio(
+            "ただ最後に一つだけ。",
+            "058.wav"
+        );
+        await playSubtitleAndAudio(
+            "きっとみなさんがもとの世界に戻った後も、",
+            "059.wav"
+        );
+        await playSubtitleAndAudio(
+            "忘れたくない楽しい時間を過ごすことでしょう。",
+            "060.wav"
+        );
+        await playSubtitleAndAudio(
+            "そこで得られるかけがえのない記憶や思い出が",
+            "061.wav"
+        );
+        await playSubtitleAndAudio(
+            "みなさんの持ち物であり続けることを祈っています。",
+            "062.wav"
+        );
+        await playSubtitleAndAudio(
+            "それでは、",
+            "063.wav"
+        );
+        await playSubtitleAndAudio(
+            "右奥の扉がもとの世界への出口となっています。",
+            "064.wav"
+        );
+        await playSubtitleAndAudio(
+            "あちらの世界でもお元気で。",
+            "065.wav"
+        );
+    }, 3000);
+}
 
 init();
