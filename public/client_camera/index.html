@@ -14,7 +14,7 @@
         <button id="connect-btn">接続</button>
     </div>
     <div id="waiting-screen" class="hidden">
-        <div class="message">待機中...</div>
+        <div class="message" id="waiting_message">触らないでください</div>
     </div>
     
     <div id="number-display" class="hidden"></div>
@@ -27,6 +27,8 @@
             <p>残り撮影枚数: <span id="remaining-shots">0</span></p>
         </div>
     </div>
+
+    <div id="gallery-container" class="hidden"></div>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.8.1/socket.io.min.js"></script>
     <script src="script.js"></script>

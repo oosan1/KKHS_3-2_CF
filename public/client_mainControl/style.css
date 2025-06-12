@@ -117,7 +117,7 @@ input[type="color"], input[type="number"], input[type="range"] {
 #photo-gallery {
     margin-top: 20px;
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
     gap: 15px;
 }
 .photo-container {
@@ -131,6 +131,7 @@ input[type="color"], input[type="number"], input[type="range"] {
 }
 .photo-container img {
     max-width: 100%;
+    width: 100%;
     height: auto;
     display: block;
     margin-top: 5px;

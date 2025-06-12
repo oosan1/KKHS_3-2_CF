@@ -70,10 +70,20 @@ io.on('connection', (socket) => {
     });
 
     // 進行管理
-    // ナビの案内をスタート
+    // ナビの案内
     socket.on('control-start-navi', (data) => {
         io.emit('command-start-navi', data);
     });
+
+    // 正誤判定を開始
+    socket.on('control-TrueOrFalse', () => {
+        io.emit('command-TrueOrFalse');
+    })
+
+    // 
+    socket.on('control-sound', (data) => {
+        io.emit('command-sound', data);
+    })
 
     // 切断処理
     socket.on('disconnect', () => {
@@ -150,10 +160,16 @@ io.on('connection', (socket) => {
             const clientNumber = clientsA[socket.id];
             controlSocket.emit('photo-from-client', {
                 number: clientNumber,
-                photoData: data.photoData
+                photoData: data.photoData,
+                pictureCount: data.pictureCount
             });
+            console.log("写真を受信");
         }
     });
+
+    socket.on('control-showImages', (data) => {
+        io.emit('command-showImages', {photos: data.photoData})
+    })
 
 });
 

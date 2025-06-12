@@ -29,6 +29,8 @@ connectToServerBtn.addEventListener('click', () => {
 
 // --- 共通 ---
 let connectedClients = [];
+let ipad_photos = {};
+let photo_count = 0;
 
 // モード切り替え
 modeSelector.addEventListener('click', (e) => {
@@ -62,19 +64,85 @@ function updateButtonStates() {
 
 // 進行管理
 const naviStartBtn = document.getElementById('navi-start-button');
-const naviIPadBtn = document.getElementById('navi-iPad-button');
-const navi1thBtn = document.getElementById('navi-1th-button');
+const navi_2thBtn = document.getElementById('navi-2-button');
+const navi_ringBtn = document.getElementById('navi-ring-button');
+const navi_3thBtn = document.getElementById('navi-3-button');
+const navi_4thBtn = document.getElementById('navi-4-button');
+const navi_5thBtn = document.getElementById('navi-5-button');
+const navi_6thBtn = document.getElementById('navi-6-button');
+const navi_7thBtn = document.getElementById('navi-7-button');
+const navi_8thBtn = document.getElementById('navi-8-button');
+const navi_9thBtn = document.getElementById('navi-9-button');
+const navi_10thBtn = document.getElementById('navi-10-button');
+//const navi1thBtn = document.getElementById('navi-1th-button');
 const shotCountInput = document.getElementById('shot-count');
+
+let pictureTF = {};
+
 naviStartBtn.addEventListener('click', () => {
     socket.emit('control-start-navi', {mode: 'start'});
 })
-naviIPadBtn.addEventListener('click', () => {
-    socket.emit('control-start-navi', {mode: 'iPad'});
+navi_2thBtn.addEventListener('click', () => {
+    socket.emit('control-start-navi', {mode: '2th'});
 })
-navi1thBtn.addEventListener('click', () => {
+navi_ringBtn.addEventListener('click', () => {
+    socket.emit('control-start-navi', {mode: 'ring'});
+})
+navi_3thBtn.addEventListener('click', () => {
+    socket.emit('control-start-navi', {mode: '3th'});
+});
+navi_4thBtn.addEventListener('click', () => {
+    socket.emit('control-start-navi', {mode: '4th'});
+});
+navi_5thBtn.addEventListener('click', () => {
+    socket.emit('control-start-navi', {mode: '5th'});
+});
+navi_6thBtn.addEventListener('click', () => {
+    socket.emit('control-start-navi', {mode: '6th', count: 1});
+    // ギャラリーを初期化
+    photoGallery.innerHTML = '';
+    connectedClients.forEach(num => {
+        const container = document.createElement('div');
+        container.id = `photo-container-${num}`;
+        container.classList.add('photo-container');
+        container.innerHTML = `<h3>iPad ${num}</h3>`;
+        photoGallery.appendChild(container);
+    });
+});
+navi_7thBtn.addEventListener('click', () => {
+    socket.emit('control-start-navi', {mode: '7th'});
+})
+navi_8thBtn.addEventListener('click', () => {
+    const shutter_count = parseInt(shotCountInput.value, 10);
+    socket.emit('control-start-navi', {mode: 'search', count: shutter_count});
+    // ギャラリーを初期化
+    ipad_photos = {};
+    photoGallery.innerHTML = '';
+    connectedClients.forEach(num => {
+        const container = document.createElement('div');
+        container.id = `photo-container-${num}`;
+        container.classList.add('photo-container');
+        container.innerHTML = `<h3>iPad ${num}</h3>`;
+        photoGallery.appendChild(container);
+    });
+})
+navi_9thBtn.addEventListener('click', () => {
+    socket.emit('control-start-navi', {mode: 'ring'});
+})
+navi_10thBtn.addEventListener('click', () => {
+    socket.emit('control-start-navi', {mode: '8th'});
+})
+navi_11thBtn.addEventListener('click', () => {
+    socket.emit('control-start-navi', {mode: '9th', count: photo_count});
+    photo_count = 0;
+})
+navi_12thBtn.addEventListener('click', () => {
+    socket.emit('control-start-navi', {mode: '10th'});
+})
+/*navi1thBtn.addEventListener('click', () => {
     const count = parseInt(shotCountInput.value, 10);
     socket.emit('control-start-navi', {mode: '1th', count: count});
-})
+})*/
 
 
 // --- 機能①: 画面色変更 ---
@@ -157,8 +225,48 @@ function initializeSocketEvents() {
         if (container) {
             const img = document.createElement('img');
             img.src = data.photoData;
+            img.dataset.photonumber = data.number;
+            img.dataset.count = data.pictureCount;
+            const dynamicKey = String(data.pictureCount)
+            if (!pictureTF[data.number]) {
+                pictureTF[data.number] = {}
+            }
+            if (!ipad_photos[data.number]) {
+                ipad_photos[data.number] = {}
+            }
+            pictureTF[data.number][dynamicKey] = true;
+            ipad_photos[data.number][dynamicKey] = data.photoData;
             container.appendChild(img);
+
+            const status_p = document.createElement('p');
+            status_p.innerText = "NaN";
+            container.appendChild(status_p);
+
+            img.addEventListener('click', {pict_status: status_p, pict: img, handleEvent: function (e) {
+                const img_bool = pictureTF[this.pict.dataset.photonumber][this.pict.dataset.count];
+                if (img_bool) {
+                    this.pict_status.innerText = "✖";
+                    pictureTF[this.pict.dataset.photonumber][this.pict.dataset.count] = false;
+                }else {
+                    this.pict_status.innerText = "〇";
+                    pictureTF[this.pict.dataset.photonumber][this.pict.dataset.count] = true;
+                }
+            }})
         }
+    });
+
+    socket.on('command-TrueOrFalse', () => {
+        let photos = []
+        for (let number in ipad_photos) {
+            for (let count in ipad_photos[number]) {
+                if (pictureTF[number][count]) {
+                    photos.push(ipad_photos[number][count]);
+                    photo_count++;
+                }
+            }
+        }
+        socket.emit('control-showImages', {photoData: photos})
+        console.log(photos);
     });
 }
 

@@ -32,9 +32,33 @@
                 <label for="shot-count">撮影枚数:</label>
                 <input type="number" id="shot-count" value="3" min="1">
             </div>
-            <button id="navi-start-button">スタート</button>
-            <button id="navi-iPad-button">iPadの説明を開始</button>
-            <button id="navi-1th-button">間違い探し一週目の説明を開始</button>
+            <div>
+                <p>1周目(正しい世界):</p>
+                <button id="navi-start-button">スタート</button>
+                <button id="navi-2-button">参加者が正しい世界へ入る</button>
+                <button id="navi-ring-button">鐘を鳴らす</button>
+                <button id="navi-3-button">参加者がもとの部屋に戻ってくる</button>
+            </div>
+            <br>
+            <div>
+                <p>2周目(間違い世界1):</p>
+                <button id="navi-4-button">iPadを渡す</button>
+                <button id="navi-5-button">iPadの説明を始める</button>
+                <button id="navi-6-button">iPadの練習をする</button>
+                <button id="navi-7-button">正誤判定(練習)</button>
+                <button id="navi-8-button">撮影モード</button>
+                <button id="navi-9-button">撮影終了</button>
+                <button id="navi-10-button">正誤判定(写真の確認)</button>
+                <button id="navi-11-button">正誤判定(枚数の報告)</button>
+                <button id="navi-12-button">続行</button>
+            </div>
+            <div>
+                <p>2周目(間違い世界1):</p>
+                <button id="navi-4-button">iPadを渡す</button>
+                <button id="navi-5-button">iPadの説明を始める</button>
+                <button id="navi-6-button">iPadの練習をする</button>
+                <button id="navi-7-button">正誤判定(練習)</button>
+            </div>
         </div>
 
         <div id="number-mode" class="mode-panel hidden">
@@ -56,11 +80,7 @@
         </div>
 
         <div id="photo-mode" class="mode-panel hidden">
-            <h2>画像撮影モード</h2>
-            <div class="photo-controls">
-                <button id="start-shooting-btn">撮影開始</button>
-                <button id="stop-shooting-btn">撮影停止</button>
-            </div>
+            <h2>画像確認</h2>
             <div id="photo-gallery"></div>
         </div>
     </main>

@@ -10,7 +10,10 @@ const MASK_STORAGE_KEY = "houseMaskShape";
 const DELAY_PER_CHAR = 200;
 
 //音声ファイル数
-const AUDIO_FILE_COUNT = 16;
+const AUDIO_FILE_COUNT = 47;
+
+// 「なくしもの」カウント
+let nakushimono = 10;
 
 // ======== PIXIアプリケーションの初期化 ========
 let app = new PIXI.Application();
@@ -26,10 +29,10 @@ resizeApp();
 
 // 描画範囲
 const MASK_POINTS = {
-    centerX: 690,
-    centerY: 355,
-    width: 420,
-    height: 300,
+    centerX: 660,
+    centerY: 550,
+    width: 595,
+    height: 450,
     roofHeight: 40
 }
 
@@ -60,7 +63,6 @@ connectButton.addEventListener("click", async () => {
             console.error("AudioContext resume failed:", e);
         }
     }
-    await loadAudioFiles()
     connectButton.style.display = "none";
     serverUrl.style.display = "none";
     await loadAudioFiles(); // ここで読み込む
@@ -80,10 +82,25 @@ function initializeSocketEvents() {
     });
 
     socket.on('command-start-navi', (data) => {
+        console.log(data);
         if (data.mode == "start") {
             show1();
-        }else if (data.mode == "iPad") {
+        }else if (data.mode == "2th") {
             show2();
+        }else if (data.mode == "ring") {
+            ring();
+        }else if (data.mode == "3th") {
+            show3();
+        }else if (data.mode == "5th") {
+            show5();
+        }else if (data.mode == "7th") {
+            show7();
+        }else if (data.mode == "8th") {
+            show8();
+        }else if (data.mode == "9th") {
+            show9();
+        }else if (data.mode == "10th") {
+            show10();
         }
     });
 };
@@ -96,9 +113,10 @@ async function loadAudioFiles() {
     for (let i = 1; i <= AUDIO_FILE_COUNT; i++) {
         audioFileNames.push(`${String(i).padStart(3, '0')}.wav`);
     }
+    audioFileNames.push("ring.mp3");
 
     for (const fileName of audioFileNames) {
-        const response = await fetch(`audio/navi/${fileName}`);
+        const response = await fetch(`audio/${fileName}`);
         const arrayBuffer = await response.arrayBuffer();
         const audioBuffer = await audioContext.decodeAudioData(arrayBuffer);
         audioBuffers[fileName] = audioBuffer;
@@ -125,9 +143,9 @@ function playAudioBuffer(fileName, when = 0, volume = 1.0) {
 
 // ======== 字幕の管理 ========
 const subtitleElement = document.getElementById('subtitle-container');
-subtitleElement.style.bottom        = "300px";    // 画面下からの位置
-subtitleElement.style.left          = "690px";    // 画面左からの位置
-subtitleElement.style["max-width"]  = "400px";  // 最大横幅
+subtitleElement.style.bottom        = "50px";    // 画面下からの位置
+subtitleElement.style.left          = "660px";    // 画面左からの位置
+subtitleElement.style["max-width"]  = "560px";  // 最大横幅
 subtitleElement.style["font-size"]  = "20px";   // フォントサイズ
 if (TEST_MODE) {
     subtitleElement.innerHTML = "これはテストテキストです。これはテストテキストです。これはテストテキストです。";
@@ -297,12 +315,16 @@ function floating(delta) {
     character.y = character.animationProps.initialY + Math.sin(character.animationProps.time) * 10;
     character.y += 0.1;
     // 円弧の回転
+}
+
+function rotating(delta) {
     character.animationProps.arcs.rotation += 0.01 * delta;
     for (const arc of character.children[0].children) {
         arc.rotation += arc.speed;
     }
 }
 app.ticker.add(floating);
+app.ticker.add(rotating);
 
 // ======== 初期化処理 ========
 
@@ -316,6 +338,7 @@ function init() {
 
 async function show1() {
     socket.emit('information-navi-status', {status: "出現中"});
+    character.y = MASK_POINTS.centerY - 50;
     await new Promise(resolve => {
         gsap.to(character, {
             alpha: 1,      // 最終的な透明度
@@ -329,7 +352,7 @@ async function show1() {
     await playSubtitleAndAudio(
             "こんにちは。あなたがたがここへ来ていることは気づいていました。",
             "001.wav"
-    );
+    );/*
     await playSubtitleAndAudio(
             "来れるはずが無い、来てはいけない「ここ」になぜいるのでしょうか。",
             "002.wav"
@@ -367,16 +390,343 @@ async function show1() {
             "010.wav"
     );
     await playSubtitleAndAudio(
-            "あちらの扉から裏世界へ進んでください。",
+            "では、左後ろの通路から裏世界へ進んでください。",
             "011.wav"
-    );
+    );*/
+    setTimeout(async () =>{
+        await playSubtitleAndAudio(
+                "ただし、裏世界の物は絶対に触らないでくださいね。",
+                "012.wav"
+        );
+    }, 1000);
 }
 
 async function show2() {
     await playSubtitleAndAudio(
-            "では、台の端末を手に取ってください。",
-            "003.wav"
+        "ここは「なくしもの」の無い裏世界です。",
+        "013.wav"
+    );
+    await playSubtitleAndAudio(
+        "この世界は一度しか見ることができません。",
+        "014.wav"
+    );
+    await playSubtitleAndAudio(
+        "きちんと目に焼き付けてください。",
+        "015.wav"
+    );
+    await playSubtitleAndAudio(
+        "私が鐘を鳴らしたら、こちらへ帰ってきてください。",
+        "016.wav"
     );
 }
+
+async function ring() {
+    await playAudio("ring.mp3");
+    await playAudio("ring.mp3");
+    await playAudio("ring.mp3");
+    await playSubtitleAndAudio(
+        "では、帰ってきてください。",
+        "017.wav"
+    );
+}
+
+async function show3() {
+    await playSubtitleAndAudio(
+        "今見ていただいたのが本来の裏世界です。",
+        "018.wav"
+    );
+    await playSubtitleAndAudio(
+        "次から見ていただくのは「なくしもの」に浸食された裏世界です。",
+        "019.wav"
+    );
+    await playSubtitleAndAudio(
+        "では、こちらをお渡ししましょう。",
+        "020.wav"
+    );
+    app.ticker.remove(floating)
+    await new Promise(resolve => {
+        gsap.to(character, {
+            y: window.innerHeight + 500,      // 最終的な透明度
+            duration: 5,   // アニメーション時間（秒）
+            ease: "bouns.out", // アニメーションのイージング（オプション）
+            onComplete: () => {
+                resolve();
+            }
+        });
+    });
+}
+
+async function show5() {
+    await new Promise(resolve => {
+        gsap.to(character, {
+            y: MASK_POINTS.centerY - 50,      // 最終的な透明度
+            duration: 5,   // アニメーション時間（秒）
+            ease: "bouns.out", // アニメーションのイージング（オプション）
+            onComplete: () => {
+                resolve();
+            }
+        });
+    });
+    await playSubtitleAndAudio(
+        "では、端末を取って席へ戻ってください。",
+        "021.wav"
+    );
+    await playSubtitleAndAudio(
+        "この端末はあなたがたが見つけた「なくしもの」を記録する際に使います。",
+        "022.wav"
+    );
+    await playSubtitleAndAudio(
+        "もし、先ほど見た本来の裏世界にはない「なくしもの」を見つけたら写真に撮ってください。",
+        "023.wav"
+    );
+    await playSubtitleAndAudio(
+        "では練習してみましょう。",
+        "024.wav"
+    );
+}
+
+async function show7() {
+    await playSubtitleAndAudio(
+        "では",
+        "025.wav"
+    );
+    socket.emit('control-sound', {mode: "check"});
+    await new Promise(resolve => {
+        gsap.to(character, {
+            y: window.innerHeight + 500,      // 最終的な透明度
+            duration: 5,   // アニメーション時間（秒）
+            ease: "bouns.out", // アニメーションのイージング（オプション）
+            onComplete: () => {
+                resolve();
+            }
+        });
+    });
+    socket.emit('control-TrueOrFalse');
+    await new Promise(resolve => {
+        gsap.to(character, {
+            y: MASK_POINTS.centerY - 50,      // 最終的な透明度
+            duration: 5,   // アニメーション時間（秒）
+            ease: "bouns.out", // アニメーションのイージング（オプション）
+            onComplete: () => {
+                resolve();
+            }
+        });
+    });
+    await playSubtitleAndAudio(
+        "皆さん正しく撮れているようですね。",
+        "026.wav"
+    );
+    await playSubtitleAndAudio(
+        "では本番へ移りましょう。",
+        "027.wav"
+    );
+    await playSubtitleAndAudio(
+        "みなさんには裏世界で見つけた変化を撮っていただきます。",
+        "028.wav"
+    );
+    await playSubtitleAndAudio(
+        "もし、それが「なくしもの」であれば、私が浄化します。",
+        "029.wav"
+    );
+    await playSubtitleAndAudio(
+        "私が浄化しなければいけない「なくしもの」は全部で10個です。",
+        "030.wav"
+    );
+    await playSubtitleAndAudio(
+        "指定の枚数を撮り切ったら、この部屋に戻ってきてください。",
+        "031.wav"
+    );
+    await playSubtitleAndAudio(
+        "では、左後ろの通路から裏世界へ進んでください。",
+        "011.wav"
+    );
+}
+
+async function show8() {
+    await playSubtitleAndAudio(
+        "みなさん、「なくしもの」は見つけられましたか？",
+        "033.wav"
+    );
+    await playSubtitleAndAudio(
+        "では",
+        "025.wav"
+    );
+    socket.emit('control-sound', {mode: "check"});
+    await new Promise(resolve => {
+        gsap.to(character, {
+            y: window.innerHeight + 500,      // 最終的な透明度
+            duration: 5,   // アニメーション時間（秒）
+            ease: "bouns.out", // アニメーションのイージング（オプション）
+            onComplete: () => {
+                resolve();
+            }
+        });
+    });
+    socket.emit('control-TrueOrFalse');
+    await new Promise(resolve => {
+        gsap.to(character, {
+            y: MASK_POINTS.centerY - 50,      // 最終的な透明度
+            duration: 5,   // アニメーション時間（秒）
+            ease: "bouns.out", // アニメーションのイージング（オプション）
+            onComplete: () => {
+                resolve();
+            }
+        });
+    });
+}
+
+async function show9(count) {
+    if (count < 10) {
+        await playSubtitleAndAudio(
+            "見つけた「なくしもの」は",
+            "034.wav"
+        );
+    }
+    if (count == "1") {
+        await playSubtitleAndAudio(
+            "1個です。",
+            "035.wav"
+        );
+        nakushimono -= Number(count);
+    }else if (count == "2") {
+        await playSubtitleAndAudio(
+            "2個です。",
+            "036.wav"
+        );
+        nakushimono -= Number(count);
+    }else if (count == "3") {
+        await playSubtitleAndAudio(
+            "3個です。",
+            "037.wav"
+        );
+        nakushimono -= Number(count);
+    }else if (count == "4") {
+        await playSubtitleAndAudio(
+            "4個です。",
+            "038.wav"
+        );
+        nakushimono -= Number(count);
+    }else if (count == "5") {
+        await playSubtitleAndAudio(
+            "5個です。",
+            "039.wav"
+        );
+        nakushimono -= Number(count);
+    }else if (count == "6") {
+        await playSubtitleAndAudio(
+            "6個です。",
+            "040.wav"
+        );
+        nakushimono -= Number(count);
+    }else if (count == "7") {
+        await playSubtitleAndAudio(
+            "7個です。",
+            "041.wav"
+        );
+        nakushimono -= Number(count);
+    }else if (count == "8") {
+        await playSubtitleAndAudio(
+            "8個です。",
+            "042.wav"
+        );
+        nakushimono -= Number(count);
+    }else if (count == "9") {
+        await playSubtitleAndAudio(
+            "9個です。",
+            "043.wav"
+        );
+        nakushimono -= Number(count);
+    }else if (count == "10") {
+        await playSubtitleAndAudio(
+            "全ての「なくしもの」を見つけました。",
+            "044.wav"
+        );
+        nakushimono -= Number(count);
+    }else if (count == "0") {
+        await playSubtitleAndAudio(
+            "ありませんでした。",
+            "045.wav"
+        );
+    }
+
+    if (nakushimono > 0) {
+        await playSubtitleAndAudio(
+            "残りの「なくしもの」は",
+            "046.wav"
+        );
+    }
+    if (nakushimono == 1) {
+        await playSubtitleAndAudio(
+            "1個です。",
+            "035.wav"
+        );
+    }else if (nakushimono == "2") {
+        await playSubtitleAndAudio(
+            "2個です。",
+            "036.wav"
+        );
+    }else if (nakushimono == "3") {
+        await playSubtitleAndAudio(
+            "3個です。",
+            "037.wav"
+        );
+    }else if (nakushimono == "4") {
+        await playSubtitleAndAudio(
+            "4個です。",
+            "038.wav"
+        );
+    }else if (nakushimono == "5") {
+        await playSubtitleAndAudio(
+            "5個です。",
+            "039.wav"
+        );
+    }else if (nakushimono == "6") {
+        await playSubtitleAndAudio(
+            "6個です。",
+            "040.wav"
+        );
+    }else if (nakushimono == "7") {
+        await playSubtitleAndAudio(
+            "7個です。",
+            "041.wav"
+        );
+    }else if (nakushimono == "8") {
+        await playSubtitleAndAudio(
+            "8個です。",
+            "042.wav"
+        );
+    }else if (nakushimono == "9") {
+        await playSubtitleAndAudio(
+            "9個です。",
+            "043.wav"
+        );
+    }else if (nakushimono == "10") {
+        await playSubtitleAndAudio(
+            "10個です。",
+            "047.wav"
+        );
+        nakushimono -= Number(count);
+    }
+}
+
+async function show10() {
+    await playSubtitleAndAudio(
+        "まだ時間はあります。",
+        "033.wav"
+    );
+    await playSubtitleAndAudio(
+        "引き続き頑張ってください。",
+        "025.wav"
+    );
+    await playSubtitleAndAudio(
+        "一度見つけた「なくしもの」を再度撮影する必要はありません。",
+        "025.wav"
+    );
+    await playSubtitleAndAudio(
+        "では、左後ろの通路から裏世界へ進んでください。",
+        "011.wav"
+    );
+}
+
 
 init();
